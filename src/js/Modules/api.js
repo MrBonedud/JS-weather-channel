@@ -16,16 +16,22 @@ async function fetchWeather(location) {
 
         const dailyData = await Promise.all(
             data.days.slice(0, 7).map(async (day) => {
-                const weatherIcon = determineWeatherIcon(day.icon);
+                // For day icons
+                const dayIcon = determineWeatherIcon(day.icon, false);
                 const gifCondition = determineGifCondition(day.icon);
                 const gifUrl = await fetchGif(gifCondition);
+                
+                // For night icons - explicitly set isNight to true
+                const nightIcon = determineWeatherIcon(day.icon, true);
                 
                 return {
                     date: day.datetime,
                     formattedDate: formatDate(day.datetime),
-                    temp: Math.round(day.temp),
+                    dayTemp: Math.round(day.tempmax || day.temp),
+                    nightTemp: Math.round(day.tempmin || day.temp),
                     description: day.conditions,
-                    icon: weatherIcon,
+                    dayIcon: dayIcon,
+                    nightIcon: nightIcon,
                     gifUrl: gifUrl,
                 };
             })
@@ -39,22 +45,32 @@ async function fetchWeather(location) {
     }
 }
 
-function determineWeatherIcon(apiIcon) {
-  const iconMapping = {
-    'clear-day': 'clear-day',
-    'clear-night': 'clear-night',
-    'partly-cloudy-day': 'partly-cloudy-day',
-    'partly-cloudy-night': 'partly-cloudy-night',
-    'rain': 'rain-night',           
-    'snow': 'snow-night',           
-    'thunder': 'thunderstorm',
-    'thunder-rain': 'thunderstorm',
-    'thunder-showers': 'thunderstorm'
-};
-
-
-    return iconMapping[apiIcon] || 'sunny'; 
-}
+function determineWeatherIcon(apiIcon, isNight = false) {
+    const iconMapping = {
+      'clear-day': 'clear-day',
+      'clear-night': 'clear-night',
+      'partly-cloudy-day': 'partly-cloudy-day',
+      'partly-cloudy-night': 'partly-cloudy-night',
+      'rain': isNight ? 'rain-night' : 'rain-day',           
+      'snow': isNight ? 'snow-night' : 'snow-day',           
+      'thunder': 'thunderstorm',
+      'thunder-rain': 'thunderstorm',
+      'thunder-showers': 'thunderstorm',
+      'cloudy': 'cloudy' 
+    };
+  
+    const baseIcon = iconMapping[apiIcon] || 'sunny';
+    
+    // If it's night and the icon doesn't already have a night variant
+    if (isNight && !baseIcon.includes('night')) {
+      // Check if we have specific night variants
+      if (['clear-day', 'partly-cloudy-day', 'rain', 'snow'].includes(apiIcon)) {
+        return baseIcon.replace('day', 'night') || `${baseIcon}-night`;
+      }
+    }
+    
+    return baseIcon;
+  }
 
 function determineGifCondition(apiIcon) {
     const gifMapping = {

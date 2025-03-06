@@ -7,8 +7,9 @@ function createWeatherCard(weatherData, index) {
     const card = document.createElement('div');
     card.className = 'weather-card';
     
-    const formattedDate = formatDate(weatherData.date);
-    const temperature = isCelsius ? weatherData.temp : celsiusToFahrenheit(weatherData.temp);
+    const formattedDate = weatherData.formattedDate;
+    const dayTemperature = isCelsius ? weatherData.dayTemp : celsiusToFahrenheit(weatherData.dayTemp);
+    const nightTemperature = isCelsius ? weatherData.nightTemp : celsiusToFahrenheit(weatherData.nightTemp);
     
     card.innerHTML = `
         <div class="card-content">
@@ -17,9 +18,9 @@ function createWeatherCard(weatherData, index) {
                 <div class="day-forecast">
                     <h3>Daytime</h3>
                     <div class="weather-info">
-                        <div class="temperature">${temperature}°${isCelsius ? 'C' : 'F'}</div>
+                        <div class="temperature">${dayTemperature}°${isCelsius ? 'C' : 'F'}</div>
                         <div class="weather-icon">
-                            <img src="img/${weatherData.icon}.svg" 
+                            <img src="img/${weatherData.dayIcon}.svg" 
                                  alt="${weatherData.description}"
                                  width="80"
                                  height="80">
@@ -30,9 +31,9 @@ function createWeatherCard(weatherData, index) {
                 <div class="night-forecast">
                     <h3>Nighttime</h3>
                     <div class="weather-info">
-                        <div class="temperature">${temperature}°${isCelsius ? 'C' : 'F'}</div>
+                        <div class="temperature">${nightTemperature}°${isCelsius ? 'C' : 'F'}</div>
                         <div class="weather-icon">
-                            <img src="img/${weatherData.icon}.svg" 
+                            <img src="img/${weatherData.nightIcon}.svg" 
                                  alt="${weatherData.description}"
                                  width="80"
                                  height="80">
